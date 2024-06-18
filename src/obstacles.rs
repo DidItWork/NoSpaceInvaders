@@ -1,15 +1,19 @@
 use std::ops::Range;
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 use rand::Rng;
+use std::f32::consts::PI;
 use crate::{
     asset_loader::SceneAssets,
-    movement::{Velocity, Acceleration, MovingObjectBundle},
+    movement::MovingObjectBundle,
 };
 
-const VELOCITY_SCALAR: f32 = 5.0;
-const ACCELERATION_SCALAR: f32 = 1.0;
-const SPAWN_RANGE_X: Range<f32> = 0.0..25.0;
-const SPAWN_RANGE_Z: Range<f32> = 0.0..25.0;
+const ASTEROID_VELOCITY: f32 = 5.0;
+const ASTEROID_ACCELERATION: f32 = 1.0;
+// const SPAWN_RANGE_X: Range<f32> = 0.0..25.0;
+// const SPAWN_RANGE_Z: Range<f32> = 0.0..25.0;
+const SPAWN_ANGLE: Range<f32> = 0.0..2.0*PI;
+const SPAWN_DIST: f32 = 90.0;
 const SPAWN_TIME_SECONDS: f32 = 1.0;
 
 #[derive(Component, Debug)]
@@ -38,29 +42,44 @@ fn spawn_asteroid(mut commands: Commands, mut spawn_timer: ResMut<SpawnTimer>, t
 
     let mut rng = rand::thread_rng();
 
+    let angle = rng.gen_range(SPAWN_ANGLE);
+
     let translation = Vec3::new(
-        rng.gen_range(SPAWN_RANGE_X),
+        angle.cos(),
         0.,
-        rng.gen_range(SPAWN_RANGE_Z),
+        angle.sin(),
     );
 
     let mut random_unit_vector = 
-        || Vec3::new(rng.gen_range(-1.0..1.0), 0., rng.gen_range(-1.0..1.0)).normalize_or_zero();
+        || (-translation.clone() + Vec3::new(rng.gen_range(-0.5..0.5), 0., rng.gen_range(-0.5..0.5))).normalize_or_zero();
 
-    let velocity = random_unit_vector() * VELOCITY_SCALAR;
-    let acceleration = random_unit_vector() * ACCELERATION_SCALAR;
+    let velocity = random_unit_vector() * ASTEROID_VELOCITY;
+    let acceleration = random_unit_vector() * ASTEROID_ACCELERATION;
 
-    commands.spawn((MovingObjectBundle {
-        velocity: Velocity::new(velocity),
-        acceleration: Acceleration::new(acceleration),
-        model: SceneBundle {
-            scene: scene_assets.asteroid.clone(),
-            transform: Transform::from_translation(translation),
-            ..default()
-        },
-    },
-    Asteroid,
-    ));
+    commands.spawn(RigidBody::Dynamic)
+    .insert(Collider::ball(2.0))
+    .insert(Restitution::coefficient(0.7))
+    .insert(Velocity {
+        linvel: velocity,
+        angvel: Vec3::ZERO,
+    })
+    .insert(GravityScale(0.0))
+    .insert((SceneBundle {
+        scene: scene_assets.asteroid.clone(),
+        transform: Transform::from_translation(translation * SPAWN_DIST),
+        ..default()
+    }
+    // .insert((TransformBundle::from(Transform::from_translation(translation * SPAWN_DIST))
+    // .insert((MovingObjectBundle {
+    //     // velocity: Velocity::new(velocity),
+    //     // acceleration: Acceleration::new(acceleration),
+    //     model: SceneBundle {
+    //         scene: scene_assets.asteroid.clone(),
+    //         transform: Transform::from_translation(translation * SPAWN_DIST),
+    //         ..default()
+    //     },
+    // },))
+    ,Asteroid));
 }
 
 // fn despawn_asteroid(mut commands: Commands, mut Query<(&Asteroid, &Window)>)
