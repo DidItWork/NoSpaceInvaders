@@ -1,7 +1,9 @@
+mod obstacles;
 mod debug;
 mod movement;
 mod spaceship;
 mod camera;
+mod asset_loader;
 
 use bevy::prelude::*;
 
@@ -9,6 +11,8 @@ use debug::DebugPlugin;
 use movement::MovementPlugin;
 use spaceship::SpaceshipPlugin;
 use camera::CameraPlugin;
+use obstacles::AsteroidPlugin;
+use asset_loader::AssetLoaderPlugin;
 
 
 // fn spawn_camera(mut commands: Commands) {
@@ -20,15 +24,17 @@ use camera::CameraPlugin;
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::rgb(0.1, 0.0, 0.15)))
+        .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.15)))
         .insert_resource(AmbientLight {
             color: Color::default(),
-            brightness: 0.75,
+            brightness: 750.0,
         })
         .add_plugins(SpaceshipPlugin)
         .add_plugins(MovementPlugin)
         .add_plugins(DebugPlugin)
         .add_plugins(CameraPlugin)
         .add_plugins(DefaultPlugins)
+        // .add_plugins(AsteroidPlugin)
+        .add_plugins(AssetLoaderPlugin)
         .run();
 }
