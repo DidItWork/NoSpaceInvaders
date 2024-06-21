@@ -37,7 +37,7 @@ fn main() {
         .add_plugins(DebugPlugin)
         .add_plugins(CameraPlugin)
         .add_plugins(DefaultPlugins)
-        .add_plugins(AsteroidPlugin)
+        // .add_plugins(AsteroidPlugin)
         .add_plugins(AssetLoaderPlugin)
         .add_plugins(DespawnPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())

@@ -19,5 +19,5 @@ fn check_for_collisions(
     mut query: Query<(Entity, &Transform,), With<Collider>>,
     mut collision_events: EventWriter<CollisionEvent>,
 ) {
-
+    
 }

@@ -57,8 +57,8 @@ fn spawn_asteroid(mut commands: Commands, mut spawn_timer: ResMut<SpawnTimer>, t
     let acceleration = random_unit_vector() * ASTEROID_ACCELERATION;
 
     commands.spawn(RigidBody::Dynamic)
-    .insert(Collider::ball(2.0))
-    .insert(Restitution::coefficient(0.7))
+    .insert(Collider::ball(1.5))
+    .insert(Restitution::coefficient(0.3))
     .insert(Velocity {
         linvel: velocity,
         angvel: Vec3::ZERO,
