@@ -10,11 +10,12 @@ const STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 const SPACESHIP_SPEED: f32 = 25.0;
 const SPACESHIP_ROTATION_SPEED: f32 = 2.5;
 const SPACESHIP_ROLL_SPEED: f32 = 2.5;
-const MISSILE_SPEED: f32 = 1.0;
+const MISSILE_SPEED: f32 = 10.0;
 const MISSILE_OFFSET: f32 = 7.5;
 const FORCE_CONST: f32 = 10.0;
 const TORQUE_CONST: f32 = 10.0;
 const THROTTLE_LIMIT: f32 = 100.0;
+const MISSILE_RATE: f32 = 1.0;
 
 #[derive(Component, Debug)]
 pub struct Spaceship;
@@ -22,12 +23,16 @@ pub struct Spaceship;
 #[derive(Component, Debug)]
 pub struct SpaceshipMissile;
 
+#[derive(Component, Debug)]
+pub struct Cooldown(Timer);
+
+
 pub struct SpaceshipPlugin;
 
 impl Plugin for SpaceshipPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, spawn_spaceships)
-            .add_systems(Update, (spaceship_movement_controls, spaceship_weapon_system));
+            .add_systems(Update, (spaceship_cooldowns, spaceship_movement_controls, spaceship_weapon_system));
     }
 }
 
@@ -52,6 +57,8 @@ fn spawn_spaceships(mut commands: Commands, scene_assets: Res<SceneAssets>) {
 
     commands.spawn(RigidBody::KinematicVelocityBased)
     .insert(Collider::ball(1.5))
+    .insert(Sensor)
+    .insert(ActiveEvents::COLLISION_EVENTS)
     .insert(Velocity{
         linvel: Vec3::ZERO,
         angvel: Vec3::ZERO,
@@ -85,7 +92,6 @@ fn spaceship_movement_controls(
     let mut roll = 0.0;
     let mut movement = 0.0;
     // let mut throttle = -transform.forward().dot(ext_force.force);
-    
 
     if keyboard_input.pressed(KeyCode::KeyW) {
         velocity.linvel = -transform.forward() * SPACESHIP_SPEED;
@@ -137,26 +143,59 @@ fn spaceship_movement_controls(
 
 fn spaceship_weapon_system(
     mut commands: Commands,
-    query: Query<&Transform, With<Spaceship>>,
+    query: Query<(Entity, &Transform), With<Spaceship>>,
+    cooldowns: Query<&Cooldown, With<Spaceship>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    scene_assets: Res<SceneAssets>
+    scene_assets: Res<SceneAssets>,
 ) {
-//     let transform = query.single();
+    let (spaceship, transform) = query.single();
 
-//     if keyboard_input.pressed(KeyCode::Space) {
-//         //Fire Missiles
-//         commands.spawn((
-//             MovingObjectBundle{
-//                 velocity:Velocity::new(-transform.forward() * MISSILE_SPEED),
-//                 acceleration: Acceleration::new(Vec3::ZERO),
-//                 model: SceneBundle {
-//                     scene: scene_assets.missile.clone(),
-//                     transform: Transform::from_translation(transform.translation - transform.forward() * MISSILE_OFFSET),
-//                 ..default()
-//                 }
-//             },
-//         SpaceshipMissile,
-//     ));
+    if keyboard_input.pressed(KeyCode::Space) {
+        //Fire Missiles
+
+        if let Ok(cooldown) = cooldowns.get(spaceship){
+            // println!("{}", cooldown.0.fraction() * 100.0);
+            return;
+        } else {
+            commands.entity(spaceship).insert(
+                Cooldown(
+                    Timer::from_seconds(
+                        1.0/MISSILE_RATE,
+                        TimerMode::Once,
+                    )
+                )
+            );
+        }
+
+        commands.spawn(RigidBody::KinematicVelocityBased)
+        .insert(Collider::ball(0.1))
+        .insert(Sensor)
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(Velocity{
+            linvel: -transform.forward() * MISSILE_SPEED,
+            angvel: Vec3::ZERO,
+        })
+        .insert((
+            SceneBundle {
+                scene: scene_assets.missile.clone(),
+                transform: Transform::from_translation(transform.translation - transform.forward() * MISSILE_OFFSET),
+                ..default()
+            },
+        SpaceshipMissile));
     
-//     }
+    }
+}
+
+fn spaceship_cooldowns(
+    mut commands: Commands,
+    mut cooldowns: Query<(Entity, &mut Cooldown)>,
+    time: Res<Time>
+) {
+    for (entity, mut cooldown) in &mut cooldowns {
+        cooldown.0.tick(time.delta());
+
+        if cooldown.0.finished() {
+            commands.entity(entity).remove::<Cooldown>();
+        }
+    }
 }
