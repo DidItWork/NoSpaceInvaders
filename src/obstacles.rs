@@ -1,11 +1,12 @@
 use std::ops::Range;
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
+use bevy_xpbd_3d::prelude::*;
 use rand::Rng;
 use std::f32::consts::PI;
 use crate::{
     asset_loader::SceneAssets,
     movement::MovingObjectBundle,
+    states::GameState,
 };
 
 const ASTEROID_VELOCITY: f32 = 5.0;
@@ -30,7 +31,7 @@ impl Plugin for AsteroidPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(SpawnTimer {
             timer: Timer::from_seconds(SPAWN_TIME_SECONDS, TimerMode::Repeating),
-        }).add_systems(Update, spawn_asteroid);
+        }).add_systems(Update, spawn_asteroid.run_if(in_state(GameState::InGame)));
     }
 }
 
@@ -57,13 +58,11 @@ fn spawn_asteroid(mut commands: Commands, mut spawn_timer: ResMut<SpawnTimer>, t
     let acceleration = random_unit_vector() * ASTEROID_ACCELERATION;
 
     commands.spawn(RigidBody::Dynamic)
-    .insert(Collider::ball(1.5))
-    .insert(Restitution::coefficient(0.3))
-    .insert(Velocity {
-        linvel: velocity,
-        angvel: Vec3::ZERO,
-    })
-    .insert(GravityScale(0.0))
+    .insert(Collider::sphere(1.5))
+    // .insert(Restitution::coefficient(0.3))
+    .insert(LinearVelocity(velocity))
+    .insert(AngularVelocity(Vec3::ZERO))
+    // .insert(GravityScale(0.0))
     .insert((SceneBundle {
         scene: scene_assets.asteroid.clone(),
         transform: Transform::from_translation(translation * SPAWN_DIST),

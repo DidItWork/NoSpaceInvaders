@@ -7,9 +7,10 @@ mod asset_loader;
 mod despawn;
 mod collision;
 mod hud;
+mod states;
 
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
+use bevy_xpbd_3d::prelude::*;
 
 use debug::DebugPlugin;
 use movement::MovementPlugin;
@@ -20,6 +21,7 @@ use asset_loader::AssetLoaderPlugin;
 use despawn::DespawnPlugin;
 use collision::CollisionPlugin;
 use hud::HUDPlugin;
+use states::StatesPlugin;
 
 // fn spawn_camera(mut commands: Commands) {
 //     commands.spawn(Camera2dBundle {
@@ -35,6 +37,7 @@ fn main() {
             color: Color::default(),
             brightness: 750.0,
         })
+        .insert_resource(Gravity(Vec3::ZERO))
         .add_plugins(SpaceshipPlugin)
         // .add_plugins(MovementPlugin)
         .add_plugins(DebugPlugin)
@@ -43,9 +46,10 @@ fn main() {
         .add_plugins(AsteroidPlugin)
         .add_plugins(AssetLoaderPlugin)
         .add_plugins(DespawnPlugin)
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(PhysicsPlugins::default())
+        // .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(CollisionPlugin)
         .add_plugins(HUDPlugin)
+        .add_plugins(StatesPlugin)
         .run();
 }

@@ -1,8 +1,9 @@
 use bevy::{prelude::*, scene};
-use bevy_rapier3d::prelude::*;
+use bevy_xpbd_3d::prelude::*;
 
 use crate::{
     asset_loader::SceneAssets,
+    states::GameState,
     // movement::{Velocity, Acceleration, MovingObjectBundle},
 };
 
@@ -32,7 +33,7 @@ pub struct SpaceshipPlugin;
 impl Plugin for SpaceshipPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, spawn_spaceships)
-            .add_systems(Update, (spaceship_cooldowns, spaceship_movement_controls, spaceship_weapon_system));
+            .add_systems(Update, (spaceship_cooldowns, spaceship_movement_controls, spaceship_weapon_system).run_if(in_state(GameState::InGame)));
     }
 }
 
@@ -55,14 +56,12 @@ fn spawn_spaceships(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     //     Spaceship,
     // ));
 
-    commands.spawn(RigidBody::KinematicVelocityBased)
-    .insert(Collider::ball(1.5))
+    commands.spawn(RigidBody::Kinematic)
+    .insert(Collider::sphere(1.5))
     .insert(Sensor)
-    .insert(ActiveEvents::COLLISION_EVENTS)
-    .insert(Velocity{
-        linvel: Vec3::ZERO,
-        angvel: Vec3::ZERO,
-    })
+    // .insert(ActiveEvents::COLLISION_EVENTS)
+    .insert(LinearVelocity(Vec3::ZERO))
+    .insert(AngularVelocity(Vec3::ZERO))
     .insert((SceneBundle {
         scene: scene_assets.spaceship.clone(),
         transform: Transform::from_translation(Vec3::ZERO),
@@ -82,45 +81,50 @@ fn spawn_spaceships(mut commands: Commands, scene_assets: Res<SceneAssets>) {
 }
 
 fn spaceship_movement_controls(
-    mut query: Query<(&mut Velocity, &Transform), With<Spaceship>>, //With is just for constraint no data from Spaceship is requried to be accessed
+    mut query: Query<(&mut AngularVelocity, &mut LinearVelocity, &Transform), With<Spaceship>>, //With is just for constraint no data from Spaceship is requried to be accessed
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
     //Panics if there is more than one entity in query
-    let (mut velocity, transform) = query.single_mut();
+    let (mut angular_velocity, mut linear_velocity, transform) = query.single_mut();
     let mut rotation = 0.0;
     let mut roll = 0.0;
     let mut movement = 0.0;
     // let mut throttle = -transform.forward().dot(ext_force.force);
 
     if keyboard_input.pressed(KeyCode::KeyW) {
-        velocity.linvel = -transform.forward() * SPACESHIP_SPEED;
+        let desired_vel = -transform.forward() * SPACESHIP_SPEED;
+        linear_velocity.x = desired_vel.x;
+        linear_velocity.y = desired_vel.y;
+        linear_velocity.z = desired_vel.z;
     } else {
-        velocity.linvel = Vec3::ZERO;
+        linear_velocity.x = 0.0;
+        linear_velocity.y = 0.0;
+        linear_velocity.z = 0.0;
     }
 
     if keyboard_input.pressed(KeyCode::KeyA) {
         // ext_force.torque = Vec3::new(0.0, 1.0, 0.0) * TORQUE_CONST;
-        velocity.angvel.y = SPACESHIP_ROTATION_SPEED;
+        angular_velocity.y = SPACESHIP_ROTATION_SPEED;
     } else if keyboard_input.pressed(KeyCode::KeyD) {
-        velocity.angvel.y = -SPACESHIP_ROTATION_SPEED;
+        angular_velocity.y = -SPACESHIP_ROTATION_SPEED;
     } else {
-        velocity.angvel.y = 0.0;
+        angular_velocity.y = 0.0;
     }
 
     if keyboard_input.pressed(KeyCode::ShiftLeft) {
         // ext_force.torque += Vec3::new(0.0, 0.0, 1.0) * TORQUE_CONST;
         let roll_axis = -transform.forward();
-        velocity.angvel.x = roll_axis.x * SPACESHIP_ROLL_SPEED;
-        velocity.angvel.z = roll_axis.z * SPACESHIP_ROLL_SPEED;
+        angular_velocity.x = roll_axis.x * SPACESHIP_ROLL_SPEED;
+        angular_velocity.z = roll_axis.z * SPACESHIP_ROLL_SPEED;
     } else if keyboard_input.pressed(KeyCode::ControlLeft) {
         // ext_force.torque += Vec3::new(0.0, 0.0, -1.0) * TORQUE_CONST;
         let roll_axis = transform.forward();
-        velocity.angvel.x = roll_axis.x * SPACESHIP_ROLL_SPEED;
-        velocity.angvel.z = roll_axis.z * SPACESHIP_ROLL_SPEED;
+        angular_velocity.x = roll_axis.x * SPACESHIP_ROLL_SPEED;
+        angular_velocity.z = roll_axis.z * SPACESHIP_ROLL_SPEED;
     } else{
-        velocity.angvel.x = 0.0;
-        velocity.angvel.z = 0.0;
+        angular_velocity.x = 0.0;
+        angular_velocity.z = 0.0;
     }
 
     // if throttle > THROTTLE_LIMIT{
@@ -167,14 +171,11 @@ fn spaceship_weapon_system(
             );
         }
 
-        commands.spawn(RigidBody::KinematicVelocityBased)
-        .insert(Collider::ball(0.1))
+        commands.spawn(RigidBody::Kinematic)
+        .insert(Collider::sphere(0.1))
         .insert(Sensor)
-        .insert(ActiveEvents::COLLISION_EVENTS)
-        .insert(Velocity{
-            linvel: -transform.forward() * MISSILE_SPEED,
-            angvel: Vec3::ZERO,
-        })
+        // .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(LinearVelocity(-transform.forward() * MISSILE_SPEED))
         .insert((
             SceneBundle {
                 scene: scene_assets.missile.clone(),

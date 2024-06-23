@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = "0.13.2"
 rand = "0.8.5"
-bevy_rapier3d = "0.26.0"
+bevy_xpbd_3d = "0.4"
 
 [profile.dev]
 opt-level = 1
