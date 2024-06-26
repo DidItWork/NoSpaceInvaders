@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy::transform::TransformSystem;
+use bevy_xpbd_3d::prelude::*;
 use crate::{
     states::GameState,
 
@@ -20,7 +22,7 @@ pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, (rotate_healthbars, update_health).run_if(in_state(GameState::InGame)));
+        app.add_systems(PostUpdate, (rotate_healthbars, update_health).run_if(in_state(GameState::InGame)).after(PhysicsSet::Sync).before(TransformSystem::TransformPropagate));
     }
 }
 
@@ -40,6 +42,7 @@ fn rotate_healthbars(
             // bar_transform.rotate_y(y);
         }
     }
+}
 
 fn update_health(
     health_containers: Query<&Parent, With<Healthbar>>,
@@ -51,6 +54,7 @@ fn update_health(
             if let Ok(hp) = health.get(health_container.get()) {
                 // println!("{} {}", hp.value, hp.max);
                 healthbar.scale = Vec3::new(hp.value/hp.max, 1., 1.);
+                healthbar.translation = Vec3::new((1.-hp.value/hp.max)*5., 0., 0.);
             }
         }
     }
