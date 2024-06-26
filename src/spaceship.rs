@@ -1,22 +1,25 @@
-use bevy::{prelude::*, scene};
+use bevy::{
+    prelude::*,
+};
 use bevy_xpbd_3d::prelude::*;
 
 use crate::{
     asset_loader::SceneAssets,
     states::GameState,
+    health::{Health, Healthbar, HealthbarVal},
     // movement::{Velocity, Acceleration, MovingObjectBundle},
 };
 
 const STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
-const SPACESHIP_SPEED: f32 = 25.0;
-const SPACESHIP_ROTATION_SPEED: f32 = 2.5;
-const SPACESHIP_ROLL_SPEED: f32 = 2.5;
-const MISSILE_SPEED: f32 = 10.0;
+const SPACESHIP_SPEED: f32 = 15.0;
+const SPACESHIP_ROTATION_SPEED: f32 = 1.0;
+const SPACESHIP_ROLL_SPEED: f32 = 1.0;
+const MISSILE_SPEED: f32 = 30.0;
 const MISSILE_OFFSET: f32 = 7.5;
 const FORCE_CONST: f32 = 10.0;
 const TORQUE_CONST: f32 = 10.0;
 const THROTTLE_LIMIT: f32 = 100.0;
-const MISSILE_RATE: f32 = 1.0;
+const MISSILE_RATE: f32 = 5.0;
 
 #[derive(Component, Debug)]
 pub struct Spaceship;
@@ -27,6 +30,8 @@ pub struct SpaceshipMissile;
 #[derive(Component, Debug)]
 pub struct Cooldown(Timer);
 
+#[derive(Component, Debug)]
+pub struct Score;
 
 pub struct SpaceshipPlugin;
 
@@ -38,7 +43,12 @@ impl Plugin for SpaceshipPlugin {
 }
 
 //defers tasks to the commands to queue and run
-fn spawn_spaceships(mut commands: Commands, scene_assets: Res<SceneAssets>) {
+fn spawn_spaceships(
+    mut commands: Commands,
+    scene_assets: Res<SceneAssets>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     // commands.spawn((
     //     MovingObjectBundle {
     //         velocity: Velocity {
@@ -77,7 +87,42 @@ fn spawn_spaceships(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     //         ..default()
     //     },
     // },))
-    ,Spaceship));
+    ,Spaceship))
+    .insert(Health{
+        value: 100.0,
+        max: 100.0,
+    })
+    .with_children(|parent|{
+        parent.spawn((PbrBundle {
+        mesh: meshes.add(Cuboid::new(10., 0., 1.)),
+        material: materials.add(StandardMaterial{
+            base_color: Color::rgba(0.0, 0.0, 0.0, 0.5),
+            ..default()
+        }),
+        // global_transform: GlobalTransform::from_translation(Vec3::new(0., 0., 10.)),
+        transform: Transform::from_translation(Vec3::new(0., 2., 5.)),
+        ..default()
+        }, Healthbar)).with_children(|parent| {
+            parent.spawn((PbrBundle {
+                mesh: meshes.add(Cuboid::new(10.,0.,1.0)),
+                material: materials.add(StandardMaterial{
+                    base_color: Color::RED,
+                    ..default()
+                }),
+                ..default()
+            }, HealthbarVal));
+        });
+
+        // parent.spawn((NodeBundle{
+        //     style: Style {
+        //         height: Val::Px(100.),
+        //         width: Val::Px(50.),
+        //         ..default()
+        //     },
+        //     transform: Transform::from_translation(Vec3::ZERO),
+        //     ..default()
+        // },UiImage::new(scene_assets.healthbar.clone())));
+    });
 }
 
 fn spaceship_movement_controls(

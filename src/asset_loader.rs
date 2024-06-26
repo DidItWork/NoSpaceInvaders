@@ -6,6 +6,7 @@ pub struct SceneAssets {
     pub spaceship: Handle<Scene>,
     pub droid: Handle<Scene>,
     pub missile: Handle<Scene>,
+    pub healthbar: Handle<Image>,
 }
 
 pub struct AssetLoaderPlugin;
@@ -23,5 +24,6 @@ fn load_assets(mut scene_assets: ResMut<SceneAssets>, asset_server: Res<AssetSer
         spaceship: asset_server.load("Ultimate Space Kit-glb/Spaceship.glb#Scene0"),
         droid: asset_server.load("Ultimate Space Kit-glb/Spaceship-Jqfed124pQ.glb#Scene0"),
         missile: asset_server.load("Ultimate Space Kit-glb/Bullets Pickup.glb#Scene0"),
+        healthbar: asset_server.load("healthbar.png"),
     }
 }

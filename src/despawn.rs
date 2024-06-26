@@ -1,5 +1,8 @@
 use bevy::prelude::*;
-use crate::obstacles::Asteroid;
+use crate::{
+    obstacles::Asteroid,
+    health::Health,
+};
 
 const DESPAWN_DISTANCE:f32 = 100.0;
 
@@ -20,4 +23,11 @@ fn despawn_far_away_entities(mut commands: Commands, query: Query<(Entity, &Glob
             commands.entity(entity).despawn_recursive();
         }
     }
+}
+
+fn despawn_health(
+    mut commands: Commands,
+    query: Query<Entity, With<Health>>,
+) {
+
 }

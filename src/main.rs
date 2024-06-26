@@ -8,6 +8,7 @@ mod despawn;
 mod collision;
 mod hud;
 mod states;
+mod health;
 
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
@@ -22,6 +23,7 @@ use despawn::DespawnPlugin;
 use collision::CollisionPlugin;
 use hud::HUDPlugin;
 use states::StatesPlugin;
+use health::{Health, HealthPlugin};
 
 // fn spawn_camera(mut commands: Commands) {
 //     commands.spawn(Camera2dBundle {
@@ -51,5 +53,6 @@ fn main() {
         .add_plugins(CollisionPlugin)
         .add_plugins(HUDPlugin)
         .add_plugins(StatesPlugin)
+        .add_plugins(HealthPlugin)
         .run();
 }
