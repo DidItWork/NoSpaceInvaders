@@ -39,8 +39,8 @@ fn check_for_collisions(
                     health.value -= HITPOINTS;
                 } else {
                     commands.entity(*e).despawn_recursive();
-                }  
-            }      
-        }      
+                }
+            }
+        }  
     }
 }

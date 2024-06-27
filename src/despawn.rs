@@ -4,13 +4,13 @@ use crate::{
     health::Health,
 };
 
-const DESPAWN_DISTANCE:f32 = 100.0;
+const DESPAWN_DISTANCE:f32 = 110.0;
 
 pub struct DespawnPlugin;
 
 impl Plugin for DespawnPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, despawn_far_away_entities);
+        app.add_systems(Update, (despawn_far_away_entities, despawn_health));
     }
 }
 
@@ -27,7 +27,11 @@ fn despawn_far_away_entities(mut commands: Commands, query: Query<(Entity, &Glob
 
 fn despawn_health(
     mut commands: Commands,
-    query: Query<Entity, With<Health>>,
+    health: Query<(Entity, &Health)>,
 ) {
-
+    for (entity, hp) in health.iter() {
+        if hp.value <= 0. {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
 }

@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    render::camera::ScalingMode,
+};
 
 const CAMERA_DISTANCE: f32 = 80.0;
 
@@ -12,6 +15,10 @@ impl Plugin for CameraPlugin {
 
 fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
+        projection: OrthographicProjection {
+            scaling_mode: ScalingMode::FixedVertical(75.0),
+            ..default()
+        }.into(),
         transform: Transform::from_xyz (0.0, CAMERA_DISTANCE, 0.0).looking_at(Vec3::ZERO, Vec3::Z),
         ..default()
     });

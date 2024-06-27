@@ -7,6 +7,7 @@ use crate::{
     asset_loader::SceneAssets,
     movement::MovingObjectBundle,
     states::GameState,
+    health::{Health, Healthbar, HealthbarVal, ASTEROID_HEALTHBAR_SIZE, ASTEROID_HEALTHBAR_TRANSLATION},
 };
 
 const ASTEROID_VELOCITY: f32 = 5.0;
@@ -35,7 +36,14 @@ impl Plugin for AsteroidPlugin {
     }
 }
 
-fn spawn_asteroid(mut commands: Commands, mut spawn_timer: ResMut<SpawnTimer>, time: Res<Time>, scene_assets: Res<SceneAssets>) {
+fn spawn_asteroid(
+    mut commands: Commands,
+    mut spawn_timer: ResMut<SpawnTimer>,
+    time: Res<Time>,
+    scene_assets: Res<SceneAssets>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     spawn_timer.timer.tick(time.delta());
     if !spawn_timer.timer.just_finished() {
         return;
@@ -78,7 +86,30 @@ fn spawn_asteroid(mut commands: Commands, mut spawn_timer: ResMut<SpawnTimer>, t
     //         ..default()
     //     },
     // },))
-    ,Asteroid));
+    ,Asteroid, Health {
+        value: 10.,
+        max: 10.,
+    })).with_children(|parent| {
+        parent.spawn((PbrBundle {
+        mesh: meshes.add(Cuboid::new(ASTEROID_HEALTHBAR_SIZE.x, ASTEROID_HEALTHBAR_SIZE.y, ASTEROID_HEALTHBAR_SIZE.z)),
+        material: materials.add(StandardMaterial{
+            base_color: Color::rgba(0.0, 0.0, 0.0, 0.5),
+            ..default()
+        }),
+        // global_transform: GlobalTransform::from_translation(Vec3::new(0., 0., 10.)),
+        transform: Transform::from_translation(ASTEROID_HEALTHBAR_TRANSLATION),
+        ..default()
+        }, Healthbar)).with_children(|parent| {
+            parent.spawn((PbrBundle {
+                mesh: meshes.add(Cuboid::new(ASTEROID_HEALTHBAR_SIZE.x, ASTEROID_HEALTHBAR_SIZE.y, ASTEROID_HEALTHBAR_SIZE.z)),
+                material: materials.add(StandardMaterial{
+                    base_color: Color::GREEN,
+                    ..default()
+                }),
+                ..default()
+            }, HealthbarVal));
+        });
+    });
 }
 
 // fn despawn_asteroid(mut commands: Commands, mut Query<(&Asteroid, &Window)>)

@@ -6,7 +6,7 @@ use bevy_xpbd_3d::prelude::*;
 use crate::{
     asset_loader::SceneAssets,
     states::GameState,
-    health::{Health, Healthbar, HealthbarVal},
+    health::{Health, Healthbar, HealthbarVal, HEALTHBAR_SIZE, HEALTHBAR_TRANSLATION},
     // movement::{Velocity, Acceleration, MovingObjectBundle},
 };
 
@@ -94,17 +94,17 @@ fn spawn_spaceships(
     })
     .with_children(|parent|{
         parent.spawn((PbrBundle {
-        mesh: meshes.add(Cuboid::new(10., 0., 1.)),
+        mesh: meshes.add(Cuboid::new(HEALTHBAR_SIZE.x, HEALTHBAR_SIZE.y, HEALTHBAR_SIZE.z)),
         material: materials.add(StandardMaterial{
             base_color: Color::rgba(0.0, 0.0, 0.0, 0.5),
             ..default()
         }),
         // global_transform: GlobalTransform::from_translation(Vec3::new(0., 0., 10.)),
-        transform: Transform::from_translation(Vec3::new(0., 2., 5.)),
+        transform: Transform::from_translation(HEALTHBAR_TRANSLATION),
         ..default()
         }, Healthbar)).with_children(|parent| {
             parent.spawn((PbrBundle {
-                mesh: meshes.add(Cuboid::new(10.,0.,1.0)),
+                mesh: meshes.add(Cuboid::new(HEALTHBAR_SIZE.x, HEALTHBAR_SIZE.y, HEALTHBAR_SIZE.z)),
                 material: materials.add(StandardMaterial{
                     base_color: Color::RED,
                     ..default()
