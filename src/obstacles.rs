@@ -111,5 +111,3 @@ fn spawn_asteroid(
         });
     });
 }
-
-// fn despawn_asteroid(mut commands: Commands, mut Query<(&Asteroid, &Window)>)

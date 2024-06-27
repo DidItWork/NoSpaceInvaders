@@ -4,7 +4,7 @@ use crate::{
     health::Health,
 };
 
-const DESPAWN_DISTANCE:f32 = 110.0;
+const DESPAWN_DISTANCE:f32 = 150.0;
 
 pub struct DespawnPlugin;
 
@@ -19,7 +19,7 @@ fn despawn_far_away_entities(mut commands: Commands, query: Query<(Entity, &Glob
         let distance = transform.translation().distance(Vec3::ZERO);
         // println!("{}", distance);
         if distance > DESPAWN_DISTANCE {
-            // println!("Despawning!");
+            println!("Despawning!");
             commands.entity(entity).despawn_recursive();
         }
     }

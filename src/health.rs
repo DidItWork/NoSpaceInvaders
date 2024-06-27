@@ -55,14 +55,17 @@ fn update_health(
     mut healthbars: Query<(&Parent, &mut Transform), With<HealthbarVal>>,
     health: Query<&Health>,
 ) {
+    // println!("{} {}\n", health_containers.iter().len(), healthbars.iter().len());
     for (parent, mut healthbar) in healthbars.iter_mut() {
         if let Ok((health_container, health_bar_shape)) = health_containers.get(parent.get()) {
             if let Ok(hp) = health.get(health_container.get()) {
-                // println!("{} {}", hp.value, hp.max);
+                // if hp.value <= 0. {
+                //     println!("{} {}", hp.value, hp.max);
+                // }
                 let half_width = health_bar_shape.half_extents.x;
                 // println!("{}\n", half_width);
                 healthbar.scale = Vec3::new(hp.value/hp.max, 1., 1.);
-                healthbar.translation = Vec3::new((1.-hp.value/hp.max)*half_width, 0., 0.);
+                healthbar.translation = Vec3::new((1.-hp.value/hp.max)*half_width, 0.1, 0.); //0.1 for y so the healthbar can be seen above the background
             }
         }
     }
