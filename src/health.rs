@@ -27,7 +27,7 @@ pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, (rotate_healthbars, update_health).run_if(in_state(GameState::InGame)).after(PhysicsSet::Sync));
+        app.add_systems(PostUpdate, (rotate_healthbars, update_health).run_if(in_state(GameState::InGame)).after(PhysicsSet::Sync).before(TransformSystem::TransformPropagate));
     }
 }
 

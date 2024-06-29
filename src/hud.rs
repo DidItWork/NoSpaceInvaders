@@ -4,7 +4,8 @@ use bevy::{
 
 use crate::{
     health::Health,
-    spaceship::{Score, Spaceship},
+    scoring::Score,
+    spaceship::Spaceship,
     states::GameState,
 };
 
@@ -40,6 +41,7 @@ fn setup(
                 height: Val::Px(20.),
                 margin: UiRect::top(Val::VMin(5.)),
                 justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
                 ..default()
             },
             ..default()
@@ -83,7 +85,7 @@ fn setup(
                 ..default()
             }).with_children(|parent| {
                 parent.spawn(TextBundle::from_section(
-                "Score:",
+                "Score: ",
                 TextStyle {
                     font: asset_server.load("fonts/FiraSansBold.ttf"),
                     font_size: 30.0,
@@ -92,7 +94,7 @@ fn setup(
             ));
 
             parent.spawn((TextBundle::from_section(
-                "0",
+                "00000000",
                 TextStyle {
                     font: asset_server.load("fonts/FiraSansBold.ttf"),
                     font_size: 30.0,

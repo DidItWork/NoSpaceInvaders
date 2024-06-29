@@ -2,10 +2,10 @@ use bevy::prelude::*;
 // use bevy_rapier3d::{prelude::*, pipeline::CollisionEvent};
 use bevy_xpbd_3d::prelude::*;
 use crate::{
-    spaceship::{Score, Spaceship},
+    spaceship::Spaceship,
     health::Health,
     states::GameState,
-    obstacles::Asteroid
+    obstacles::Asteroid,
 };
 
 const HITPOINTS: f32 = 5.0;

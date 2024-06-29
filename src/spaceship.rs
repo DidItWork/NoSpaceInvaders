@@ -30,9 +30,6 @@ pub struct SpaceshipMissile;
 #[derive(Component, Debug)]
 pub struct Cooldown(Timer);
 
-#[derive(Component, Debug)]
-pub struct Score;
-
 pub struct SpaceshipPlugin;
 
 impl Plugin for SpaceshipPlugin {
