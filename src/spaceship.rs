@@ -1,7 +1,7 @@
 use bevy::{
     prelude::*,
 };
-use bevy_xpbd_3d::prelude::*;
+use bevy_xpbd_3d::{math::PI, prelude::*};
 
 use crate::{
     asset_loader::SceneAssets,
@@ -213,6 +213,13 @@ fn spaceship_weapon_system(
             );
         }
 
+        let mut bullet_transform = Transform::from_translation(transform.translation - transform.forward() * MISSILE_OFFSET);
+
+        bullet_transform.rotation = transform.rotation;
+
+        bullet_transform.rotate_local_x(PI/2.0);
+        bullet_transform.rotate_local_y(PI/2.0);
+
         commands.spawn(RigidBody::Kinematic)
         .insert(Collider::sphere(0.1))
         .insert(Sensor)
@@ -221,7 +228,7 @@ fn spaceship_weapon_system(
         .insert((
             SceneBundle {
                 scene: scene_assets.missile.clone(),
-                transform: Transform::from_translation(transform.translation - transform.forward() * MISSILE_OFFSET),
+                transform: bullet_transform,
                 ..default()
             },
         SpaceshipMissile));

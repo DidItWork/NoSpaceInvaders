@@ -87,8 +87,8 @@ fn spawn_asteroid(
     //     },
     // },))
     ,Asteroid, Health {
-        value: 10.,
-        max: 10.,
+        value: 20.,
+        max: 20.,
     })).with_children(|parent| {
         parent.spawn((PbrBundle {
         mesh: meshes.add(Cuboid::new(ASTEROID_HEALTHBAR_SIZE.x, ASTEROID_HEALTHBAR_SIZE.y, ASTEROID_HEALTHBAR_SIZE.z)),

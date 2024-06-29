@@ -8,7 +8,7 @@ use crate::{
     obstacles::Asteroid,
 };
 
-const HITPOINTS: f32 = 5.0;
+const HITPOINTS: f32 = 10.0;
 const SPACESHIP_MULTIPLIER: f32 = 1.0;
 
 pub struct CollisionPlugin;
